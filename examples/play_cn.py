@@ -9,16 +9,20 @@ python examples/play.py
 """
 
 import sounddevice as sd
+from misaki import zh
 
 from kokoro_onnx import Kokoro
 
-text = """
-We've just been hearing from Matthew Cappucci, a senior meteorologist at the weather app MyRadar, who says Kansas City is seeing its heaviest snow in 32 years - with more than a foot (30 to 40cm) having come down so far.
-...
-"""
-
-kokoro = Kokoro("kokoro-v1.0.onnx", "voices-v1.0.bin")
-samples, sample_rate = kokoro.create(text, voice="af_sarah", speed=1.0, lang="en-us")
+g2p = zh.ZHG2P(version="1.1")
+kokoro = Kokoro("kokoro-v1.1-zh.onnx", "voices-v1.1-zh.bin", vocab_config="config.json")
+text = "寒风凛冽，如刀割般划过脸颊，却也吹不散冬日独特的宁静。湖面上结了一层厚厚的冰，仿佛一面巨大的镜子，倒映着天空与周边的雪景"
+phonemes, _ = g2p(text)
+samples, sample_rate = kokoro.create(
+    phonemes,
+    voice="zf_001",
+    speed=1.0,
+    is_phonemes=True,
+)
 print("Playing audio...")
 sd.play(samples, sample_rate)
 sd.wait()
